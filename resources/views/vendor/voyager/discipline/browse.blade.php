@@ -1,7 +1,7 @@
 @extends('vendor.voyager.master')
 
-@php($teacher=App\Models\Teacher::first())
-@can('browse',$teacher)
+@php($data=App\Models\Shift::first())
+@can('browse',$data)
 
 @section('page_header')
     <div class="container-fluid">
@@ -9,10 +9,10 @@
             <div class="col-md-6" style="margin-bottom: 0px">
                 <p class="page-title">
                     <i class="voyager-study"></i>
-                    Class Rooms
+                    Disciplines
                 </p>
 
-                <a href="{{url('admin/class-rooms/create')}}" class="btn btn-success btn-add-new">
+                <a href="{{url('admin/disciplines/create')}}" class="btn btn-success btn-add-new">
                     <i class="voyager-plus"></i> <span>{{ __('voyager::generic.add_new') }}</span>
                 </a>
             </div>
@@ -74,37 +74,65 @@
                                 <tr>
 
                                     <th>
-                                        Room No
+                                        Name
                                     </th>
                                     <th>
-                                        Seating Capacity
+                                        Short Name
                                     </th>
                                     <th>
-                                        Block
+                                        Shift
+                                    </th>
+                                    <th>
+                                        Department
+                                    </th>
+                                    <th>
+                                        Subjects
+                                    </th>
+                                    <th>
+                                        Affiliated From
                                     </th>
                                     <th class="actions text-right">{{ __('voyager::generic.actions') }}</th>
                                 </tr>
                                 </thead>
                                 <tbody>
 
-                                    @forelse($classRooms as $classRoom)
+                                    @forelse($disciplines as $discipline)
 
                                     <tr id="myTable">
 
                                         <td>
-                                            {{$classRoom->room_no}}
+                                            {{$discipline->name}}
                                         </td>
                                         <td>
-                                            {{$classRoom->seating_capacity}}
+                                            {{$discipline->short_name}}
                                         </td>
                                         <td>
-                                            {{$classRoom->block}}
+                                            {{$discipline->shift->name}}
+                                        </td>
+                                        <td>
+                                            {{$discipline->department_name}}
+                                        </td>
+
+                                        <td>
+                                            @if(count($discipline->subjects) > 0)
+                                            <a type="button" style="text-decoration: none"  data-trigger="hover"
+                                                    class="btn btn-secondary" data-container="body"
+                                                    data-toggle="popover" data-placement="top"
+                                                    data-content="{{$discipline->subjects->pluck('subject_name')}}">
+                                                {{@$discipline->subjects[0]->subject_name}},.. more
+                                            </a>
+                                            @else
+                                                Not Available
+                                            @endif
+                                        </td>
+                                        <td>
+                                            {{$discipline->affiliated_from}}
                                         </td>
                                         <td class="no-sort no-click text-right" id="bread-actions">
 
                                                 <div class="btn-toolbar">
                                                     @if(Auth::user()->hasRole('admin'))
-                                                    <button dataid="{{$classRoom->id}}" class="btn btn-danger pull-right customBtn deleteCustom" style="text-decoration: none; font-size: 12px;padding: 5px 7px">
+                                                    <button dataid="{{$discipline->id}}" class="btn btn-danger pull-right customBtn deleteCustom" style="text-decoration: none; font-size: 12px;padding: 5px 7px">
                                                         <i class="voyager-trash"></i> <span>Delete</span>
                                                     </button>
                                                     <div class="modal fade" id="myModal" role="dialog">
@@ -118,7 +146,7 @@
                                                                 </div>
                                                                 <div class="modal-footer">
 
-                                                                    <form action="{{url('admin/class-rooms/destroy')}}" method="post">
+                                                                    <form action="{{url('admin/disciplines/destroy')}}" method="post">
                                                                         {{csrf_field()}}
                                                                         {{method_field('DELETE')}}
                                                                         <input type="hidden" name="deleteid" id="deleteid">
@@ -132,10 +160,10 @@
                                                         </div>
                                                     </div>
                                                     @endif
-                                            <a href='{{url("admin/class-rooms/{$classRoom->id}")}}' class="btn btn-warning pull-right des" style="text-decoration: none; font-size: 12px;padding: 5px 7px">
+                                            <a href='{{url("admin/disciplines/{$discipline->id}")}}' class="btn btn-warning pull-right des" style="text-decoration: none; font-size: 12px;padding: 5px 7px">
                                                 <i class="voyager-eye"></i> <span>View</span>
                                             </a>
-                                            <a href='{{url("admin/class-rooms/{$classRoom->id}/edit")}}' class="btn btn-primary pull-right des" style="text-decoration: none; font-size: 12px;padding: 5px 7px">
+                                            <a href='{{url("admin/disciplines/{$discipline->id}/edit")}}' class="btn btn-primary pull-right des" style="text-decoration: none; font-size: 12px;padding: 5px 7px">
                                                 <i class="voyager-edit"></i><span>Edit</span>
                                             </a>
                                                 </div>
@@ -187,6 +215,9 @@
 @section('js')
     <script>
         $(document).ready(function() {
+            $(function () {
+                $('[data-toggle="popover"]').popover()
+            })
 
             $('.deleteCustom').click(function () {
                 var id = $(this).attr('dataid');
@@ -195,8 +226,8 @@
             });
 
             $('#example').DataTable( {
-                "order": false,
-                // "order": [[ 1, "desc" ]],
+                // "order": false
+                "order": [[ 1, "desc" ]],
                 "pageLength": 25
                 // "order": [[ 1, "asc" ]]
             } );

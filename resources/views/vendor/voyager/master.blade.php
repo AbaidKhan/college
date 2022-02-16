@@ -45,7 +45,7 @@
             color:{{ config('voyager.primary_color','#22A7F0') }};
         }
         .color{
-
+            color: red;
         }
     </style>
 
